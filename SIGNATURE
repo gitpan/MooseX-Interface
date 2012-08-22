@@ -14,12 +14,12 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 7c4adccafe9ac2a79e6daebdea382bc4c695dc97 Changes
+SHA1 31acb967cbf682de856413a6e7fcb2faad86fc38 Changes
 SHA1 cc087c3dd6e1b519c680e68cd0231735a68300a0 LICENSE
-SHA1 8a7e55687479492b77080a4c601b76cefa871505 MANIFEST
-SHA1 ee0f98b3286617879fbc79855b1efd7bf351acd7 META.yml
+SHA1 6cf10581348c357005c804bb25aed6e8f7a712bb MANIFEST
+SHA1 ec5f5776d52a88a514a686d78a204cf9ea7388e6 META.yml
 SHA1 da50d35f9bc21473691888031579fd3ad684e205 Makefile.PL
-SHA1 1a7e6b32f8e5bc5fbb6aa3395d4ed90e3f2212c4 README
+SHA1 219a5d6ed8bde858d4397b8c40f7a73f56efb255 README
 SHA1 f5a46326d93a46ca1963696f0db5aea2c0cafccf examples/eg1.pl
 SHA1 06c410f05488c1612ed66b06d3a86b2580581e4a inc/Module/AutoInstall.pm
 SHA1 8a924add836b60fb23b25c8506d45945e02f42f4 inc/Module/Install.pm
@@ -41,16 +41,17 @@ SHA1 0e0eed2e69d9583081868cf4f220068d0a018568 inc/Scalar/Util.pm
 SHA1 feb933cefe2e3762e8322bd6071a2499f3440da1 inc/YAML/Tiny.pm
 SHA1 8105c0510a773b56840995fb4dd2dc64fe9ddaee inc/unicore/Name.pm
 SHA1 36df501c7c9b73c282c5174ed54d8283b2f2cbf2 inc/utf8.pm
-SHA1 f933b705272b21fd5393e3a2521274503a4e9f5d lib/MooseX/Interface.pm
-SHA1 d4aafb4f6672a4ad4c94a57a76f9b46b2062064e meta/changes.pret
+SHA1 224bf78dfe08de0ec509f8b50b653eba15afe123 lib/MooseX/Interface.pm
+SHA1 6dba2ddd964cd075916fcc6410e036f3ebe6879c lib/MooseX/Interface/Tutorial.pod
+SHA1 784f039fd6ad54016ee2eebb42758bc87e442273 meta/changes.pret
 SHA1 ede8e13524e5f1bda6a77483d63bcb9df48fea2a meta/doap.pret
 SHA1 89f4133106e4913ef259109ed18dccbbccd05709 meta/makefile.pret
 SHA1 156b2a445d8580db656a15431cdc7ceb1d32a0d7 t/02interfaces.t
-SHA1 b677520c85ce3afa157684a6e3bfe34119f08a3b t/03embeddedtc.t
+SHA1 aa520f78da924b3d298bbfe5f939d3c0bcdf200f t/03embeddedtc.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAlA0r4IACgkQzr+BKGoqfTnbDQCfYSE8rwcggYV3MOJsGuI2jpDR
-X8UAnAlEqgsxNrZI1kZ9lfpC6E+0hbCe
-=vdqE
+iEYEARECAAYFAlA03XkACgkQzr+BKGoqfTmWWgCfdRyenxxgwp4AEVmxi2ioIgN1
+eaYAoJiNeIihjpP+mVCbAbwkrURApcqZ
+=feBf
 -----END PGP SIGNATURE-----

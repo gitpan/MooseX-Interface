@@ -6,6 +6,11 @@ Home page:    <https://metacpan.org/release/MooseX-Interface>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+0.003  2012-08-22
+
+
+ - (Documentation) Add MooseX::Interface::Tutorial.
+
 0.002  2012-08-22
 
  - (Addition) Interfaces may now provide embedded test cases.

@@ -16,7 +16,7 @@ use Class::Load 0 ();
 	
 	BEGIN {
 		$MooseX::Interface::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::VERSION   = '0.002';
+		$MooseX::Interface::VERSION   = '0.003';
 	
 		*requires = \&Moose::Role::requires;
 		*excludes = \&Moose::Role::excludes;
@@ -84,7 +84,7 @@ use Class::Load 0 ();
 	extends 'Moose::Meta::Method';
 	BEGIN {
 		$MooseX::Interface::Trait::Method::Constant::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Constant::VERSION   = '0.002';
+		$MooseX::Interface::Trait::Method::Constant::VERSION   = '0.003';
 	}
 }
 
@@ -96,7 +96,7 @@ use Class::Load 0 ();
 	
 	BEGIN {
 		$MooseX::Interface::Trait::Role::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Role::VERSION   = '0.002';
+		$MooseX::Interface::Trait::Role::VERSION   = '0.003';
 	}
 
 	has is_interface => (
@@ -126,7 +126,7 @@ use Class::Load 0 ();
 	sub add_test_case
 	{
 		my ($meta, $coderef, $name) = @_;
-		$name //= sprintf("Test case %d", @{ $meta->test_cases } + 1);
+		$name //= sprintf("%s test case %d", $meta->name, 1 + @{ $meta->test_cases });
 		push @{ $meta->test_cases }, [$coderef, $name];
 	}
 	
@@ -136,8 +136,12 @@ use Class::Load 0 ();
 		confess("Parameter is not an object that implements the interface; died")
 			unless blessed($instance) && $instance->DOES($meta->name);
 		
+		my @cases = map {
+			$_->can('test_cases') ? @{$_->test_cases} : ()
+		} $meta->calculate_all_roles;
 		my @failed;
-		foreach my $case ( @{ $meta->test_cases } )
+		
+		foreach my $case (@cases)
 		{
 			my ($code, $name) = @$case;
 			local $_ = $instance;
@@ -373,6 +377,8 @@ Please report any bugs to
 L<http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>.
 
 =head1 SEE ALSO
+
+L<MooseX::Interface::Tutorial>.
 
 L<Moose::Role>, L<MooseX::ABCD>.
 

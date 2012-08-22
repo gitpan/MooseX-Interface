@@ -41,4 +41,4 @@ resources:
   homepage: https://metacpan.org/release/MooseX-Interface
   license: http://dev.perl.org/licenses/
   repository: https://bitbucket.org/tobyink/p5-moosex-interface
-version: 0.002
+version: 0.003
