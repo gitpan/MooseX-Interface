@@ -30,4 +30,5 @@ meta/doap.pret
 meta/makefile.pret
 README
 t/02interfaces.t
+t/03embeddedtc.t
 SIGNATURE                                Public-key signature (added by MakeMaker)

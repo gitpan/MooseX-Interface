@@ -76,6 +76,55 @@ DESCRIPTION
         Experimental syntactic sugar for declaring constants. It's probably
         not a good idea to use this yet.
 
+    "test_case { BLOCK } $name"
+        Experimental syntactic sugar for embedded test cases. This extends
+        the idea that an interface is a contract for classes to fulfil.
+
+        The block will be called with an instance of a class claiming to
+        implement the interface in $_ and should return true if the instance
+        passes the test and false if it fails.
+
+          package CalculatorAPI
+          {
+            use MooseX::Interface;
+    
+            requires 'add';
+            test_case { $_->add(8, 2) == 10 };
+    
+            requires 'subtract';
+            test_case { $_->subtract(8, 2) == 6 };
+    
+            requires 'multiply';
+            test_case { $_->multiply(8, 2) == 16 };
+    
+            requires 'divide';
+            test_case { $_->divide(8, 2) == 4 };
+          }
+  
+          package Calculator
+          {
+            use Moose;
+            with 'CalculatorAPI';
+            sub add      { $_[1] + $_[2] }
+            sub subtract { $_[1] - $_[2] }
+            sub multiply { $_[1] * $_[2] }
+            sub divide   { $_[1] / $_[2] }
+          }
+  
+          my $result = CalculatorAPI->meta->test_implementation(
+            Calculator->new,
+          );
+
+        The result of "test_implementation" is a Contextual::Return object
+        which indicates success when evaluated in boolean context; indicates
+        the number of failures in numeric context; and provides TAP-like
+        "ok" or "not ok" in string context.
+
+        Do not rely on test cases being run in any particular order, or
+        maintaining any state between test cases. (Theoretically each test
+        case could be run with a separate instance of the implementing
+        class.)
+
 BUGS
     Please report any bugs to
     <http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>.
