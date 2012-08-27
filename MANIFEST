@@ -32,4 +32,5 @@ meta/makefile.pret
 README
 t/02interfaces.t
 t/03embeddedtc.t
+t/04meta.t
 SIGNATURE                                Public-key signature (added by MakeMaker)

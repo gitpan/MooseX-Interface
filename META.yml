@@ -4,6 +4,7 @@ author:
   - 'Toby Inkster <tobyink@cpan.org>'
 build_requires:
   ExtUtils::MakeMaker: 6.59
+  Test::Exception: 0
   Test::More: 0.61
 configure_requires:
   ExtUtils::MakeMaker: 6.59
@@ -41,4 +42,4 @@ resources:
   homepage: https://metacpan.org/release/MooseX-Interface
   license: http://dev.perl.org/licenses/
   repository: https://bitbucket.org/tobyink/p5-moosex-interface
-version: 0.003
+version: 0.004

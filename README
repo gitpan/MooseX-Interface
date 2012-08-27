@@ -69,8 +69,13 @@ DESCRIPTION
         The name of a method (or attribute) that any classes implementing
         this interface *must* provide.
 
-        A future version of MooseX::Interface may provide a way to declare
-        method signatures.
+    "requires $method => \@signature"
+        Declares a signature for the given method. This effectively creates
+        an "around" method modifier for the method to check the signature.
+
+        As an example:
+
+          requires log_message => [qw( Str )];
 
     "const $name => $value"
         Experimental syntactic sugar for declaring constants. It's probably
