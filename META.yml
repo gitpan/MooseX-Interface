@@ -25,10 +25,8 @@ no_index:
     - t
     - xt
 requires:
-  B::Hooks::EndOfScope: 0
-  B::Hooks::Parser: 0
   Class::Load: 0
-  Contextual::Return: 0
+  Hook::AfterRuntime: 0
   Moose: 2.00
   Moose::Exporter: 0
   Moose::Role: 2.00
@@ -42,4 +40,4 @@ resources:
   homepage: https://metacpan.org/release/MooseX-Interface
   license: http://dev.perl.org/licenses/
   repository: https://bitbucket.org/tobyink/p5-moosex-interface
-version: 0.004
+version: 0.005

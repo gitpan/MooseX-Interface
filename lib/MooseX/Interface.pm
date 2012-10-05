@@ -7,8 +7,7 @@ use Moose::Role 2.00 ();
 use Moose::Util 0 ();
 use Moose::Util::MetaRole 0 ();
 use constant 1.01 ();
-use B::Hooks::EndOfScope 0 ();
-use B::Hooks::Parser 0 ();
+use Hook::AfterRuntime 0 ();
 use Class::Load 0 ();
 
 {
@@ -16,7 +15,7 @@ use Class::Load 0 ();
 	
 	BEGIN {
 		$MooseX::Interface::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::VERSION   = '0.004';
+		$MooseX::Interface::VERSION   = '0.005';
 	
 		*requires = \&Moose::Role::requires;
 		*excludes = \&Moose::Role::excludes;
@@ -54,8 +53,10 @@ use Class::Load 0 ();
 	
 	sub import
 	{
-		my $OSE = '__PACKAGE__->meta->check_interface_integrity';
-		B::Hooks::Parser::inject("; B::Hooks::EndOfScope::on_scope_end { $OSE };");
+		my $caller = caller;
+		Hook::AfterRuntime::after_runtime {
+			$caller->meta->check_interface_integrity;
+		};
 		goto $import;
 	}
 
@@ -82,9 +83,10 @@ use Class::Load 0 ();
 	package MooseX::Interface::Trait::Method::Constant;
 	use Moose;
 	extends 'Moose::Meta::Method';
+	
 	BEGIN {
 		$MooseX::Interface::Trait::Method::Constant::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Constant::VERSION   = '0.004';
+		$MooseX::Interface::Trait::Method::Constant::VERSION   = '0.005';
 	}
 }
 
@@ -92,9 +94,10 @@ use Class::Load 0 ();
 	package MooseX::Interface::Trait::Method::Required;
 	use Moose;
 	extends 'Moose::Meta::Role::Method::Required';
+	
 	BEGIN {
 		$MooseX::Interface::Trait::Method::Required::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Required::VERSION   = '0.004';
+		$MooseX::Interface::Trait::Method::Required::VERSION   = '0.005';
 	}
 }
 
@@ -103,11 +106,18 @@ use Class::Load 0 ();
 	use Moose;
 	use Moose::Util::TypeConstraints ();
 	extends 'MooseX::Interface::Trait::Method::Required';
+	
+	BEGIN {
+		$MooseX::Interface::Trait::Method::Required::WithSignature::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Trait::Method::Required::WithSignature::VERSION   = '0.005';
+	}
+	
 	has signature => (
 		is       => 'ro',
 		isa      => 'ArrayRef',
 		required => 1,
 	);
+	
 	sub check_signature
 	{
 		my ($meta, $args) = @_;
@@ -121,22 +131,78 @@ use Class::Load 0 ();
 		
 		return 1;
 	}
+}
+
+{
+	package MooseX::Interface::ImplementationReport;
+	use Moose;
+	use namespace::clean;
+	
 	BEGIN {
-		$MooseX::Interface::Trait::Method::Required::WithSignature::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Required::WithSignature::VERSION   = '0.004';
+		$MooseX::Interface::ImplementationReport::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::ImplementationReport::VERSION   = '0.005';
+	}
+	
+	use overload
+		q[bool]  => sub { my $self = shift; !scalar(@{ $self->failed }) },
+		q[0+]    => sub { my $self = shift;  scalar(@{ $self->failed }) },
+		q[""]    => sub { my $self = shift;  scalar(@{ $self->failed }) ? 'not ok' : 'ok' },
+		q[@{}]   => sub { my $self = shift;            $self->failed    },
+		fallback => 1,
+	;
+	
+	has [qw/ passed failed /] => (
+		is        => 'ro',
+		isa       => 'ArrayRef',
+		required  => 1,
+	);
+}
+
+{
+	package MooseX::Interface::TestCase;
+	use Moose;
+	use namespace::clean;
+	
+	BEGIN {
+		$MooseX::Interface::TestCase::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::TestCase::VERSION   = '0.005';
+	}
+	
+	has name => (
+		is        => 'ro',
+		isa       => 'Str',
+		required  => 1,
+	);
+	
+	has code => (
+		is        => 'ro',
+		isa       => 'CodeRef',
+		required  => 1,
+	);
+	
+	has associated_interface => (
+		is        => 'ro',
+		isa       => 'Object',
+		predicate => 'has_associated_interface',
+	);
+	
+	sub test_instance
+	{
+		my ($self, $instance) = @_;
+		local $_ = $instance;
+		$self->code->(@_);
 	}
 }
 
 {
 	package MooseX::Interface::Trait::Role;
 	use Moose::Role;
-	use Contextual::Return;
 	use namespace::clean;
 	use overload ();
 	
 	BEGIN {
 		$MooseX::Interface::Trait::Role::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Role::VERSION   = '0.004';
+		$MooseX::Interface::Trait::Role::VERSION   = '0.005';
 	}
 
 	requires qw(
@@ -159,7 +225,7 @@ use Class::Load 0 ();
 	
 	has test_cases => (
 		is      => 'ro',
-		isa     => 'ArrayRef',
+		isa     => 'ArrayRef[MooseX::Interface::TestCase]',
 		default => sub { [] },
 	);
 	
@@ -213,8 +279,19 @@ use Class::Load 0 ();
 	sub add_test_case
 	{
 		my ($meta, $coderef, $name) = @_;
-		$name //= sprintf("%s test case %d", $meta->name, 1 + @{ $meta->test_cases });
-		push @{ $meta->test_cases }, [$coderef, $name];
+		if (blessed $coderef)
+		{
+			push @{ $meta->test_cases }, $coderef;
+		}
+		else
+		{
+			$name //= sprintf("%s test case %d", $meta->name, 1 + @{ $meta->test_cases });
+			push @{ $meta->test_cases }, 'MooseX::Interface::TestCase'->new(
+				name                 => $name,
+				code                 => $coderef,
+				associated_interface => $meta,
+			);
+		}
 	}
 	
 	sub test_implementation
@@ -226,22 +303,19 @@ use Class::Load 0 ();
 		my @cases = map {
 			$_->can('test_cases') ? @{$_->test_cases} : ()
 		} $meta->calculate_all_roles;
-		my @failed;
 		
+		my (@failed, @passed);
 		foreach my $case (@cases)
 		{
-			my ($code, $name) = @$case;
-			local $_ = $instance;
-			push @failed, $name unless $code->();
+			$case->test_instance($instance)
+				? push(@passed, $case)
+				: push(@failed, $case)
 		}
 		
-		return
-			LIST     { @failed }
-			BOOL     { @failed ? 0 : 1 }
-			NUM      { scalar @failed }
-			STR      { @failed ? 'not ok' : 'ok' }
-			ARRAYREF { \@failed }
-		;
+		return 'MooseX::Interface::ImplementationReport'->new(
+			failed => \@failed,
+			passed => \@passed,
+		);
 	}
 
 	sub find_problematic_methods
@@ -402,6 +476,10 @@ As an example:
 
   requires log_message => [qw( Str )];
 
+If the C<log_message> method above were called with multiple arguments,
+then the additional arguments would be tolerated; the only check is that
+the first argument is a string.
+
 =item C<< const $name => $value >>
 
 Experimental syntactic sugar for declaring constants. It's probably not a
@@ -447,10 +525,12 @@ test and false if it fails.
     Calculator->new,
   );
 
-The result of C<test_implementation> is a L<Contextual::Return> object which
-indicates success when evaluated in boolean context; indicates the number of
+The result of C<test_implementation> is an overloaded object which indicates
+success when evaluated in boolean context; indicates the number of
 failures in numeric context; and provides TAP-like "ok" or "not ok" in
-string context.
+string context. You can call methods C<passed> and C<failed> on this object
+to return arrayrefs of failed test cases. Each test case is itself an
+object, with C<name>, C<code> and C<associated_interface> attributes.
 
 Do not rely on test cases being run in any particular order, or maintaining
 any state between test cases. (Theoretically each test case could be run with

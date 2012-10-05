@@ -77,6 +77,10 @@ DESCRIPTION
 
           requires log_message => [qw( Str )];
 
+        If the "log_message" method above were called with multiple
+        arguments, then the additional arguments would be tolerated; the
+        only check is that the first argument is a string.
+
     "const $name => $value"
         Experimental syntactic sugar for declaring constants. It's probably
         not a good idea to use this yet.
@@ -120,10 +124,13 @@ DESCRIPTION
             Calculator->new,
           );
 
-        The result of "test_implementation" is a Contextual::Return object
-        which indicates success when evaluated in boolean context; indicates
-        the number of failures in numeric context; and provides TAP-like
-        "ok" or "not ok" in string context.
+        The result of "test_implementation" is an overloaded object which
+        indicates success when evaluated in boolean context; indicates the
+        number of failures in numeric context; and provides TAP-like "ok" or
+        "not ok" in string context. You can call methods "passed" and
+        "failed" on this object to return arrayrefs of failed test cases.
+        Each test case is itself an object, with "name", "code" and
+        "associated_interface" attributes.
 
         Do not rely on test cases being run in any particular order, or
         maintaining any state between test cases. (Theoretically each test

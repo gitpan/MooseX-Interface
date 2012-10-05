@@ -6,6 +6,14 @@ Home page:    <https://metacpan.org/release/MooseX-Interface>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+0.005  2012-10-05
+
+ - (Packaging) Include test case for method signatures.
+ - Replace B::Hooks::* usage with Hook::AfterRuntime.
+ - Replace Contextual::Return usage with a custom overloaded class.
+ - Test cases embedded within interfaces now have a better (albeit still
+   undocumented) introspection API.
+
 0.004  2012-08-27
 
  - (Addition) Allow `requires` to be a passed method signatures for the
@@ -13,8 +21,8 @@ Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
 0.003  2012-08-22
 
-
  - (Documentation) Add MooseX::Interface::Tutorial.
+ - Check parent interface test cases too when testing implementations.
 
 0.002  2012-08-22
 

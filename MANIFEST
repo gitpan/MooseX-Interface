@@ -33,4 +33,5 @@ README
 t/02interfaces.t
 t/03embeddedtc.t
 t/04meta.t
+t/05sigs.t
 SIGNATURE                                Public-key signature (added by MakeMaker)
