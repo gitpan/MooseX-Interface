@@ -6,6 +6,7 @@ SYNOPSIS
       {
         use MooseX::Interface;
         requires 'select';
+        one;
       }
   
       package DatabaseAPI::ReadWrite
@@ -15,6 +16,7 @@ SYNOPSIS
         requires 'insert';
         requires 'update';
         requires 'delete';
+        one;
       }
   
       package Database::MySQL
@@ -137,12 +139,28 @@ DESCRIPTION
         case could be run with a separate instance of the implementing
         class.)
 
+    "one"
+        This function checks the integrity of your role, making sure it
+        doesn't do anything that interfaces are not supposed to do, like
+        defining methods.
+
+        While you don't need to call this function at all, your interface's
+        integrity will get checked anyway when classes implement the
+        interface, so calling "one" will help you catch potential problems
+        sooner. "one" helpfully returns '1', so it can be used as the
+        magical return value at the end of a Perl module.
+
+        (Backwards compatibility note: in MooseX::Interface versions 0.005
+        and below, this was performed automatically using
+        Hook::AfterRuntime. From 0.006, the "one" function was introduced
+        instead.)
+
 BUGS
     Please report any bugs to
     <http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>.
 
 SEE ALSO
-    MooseX::Interface::Tutorial.
+    MooseX::Interface::Tutorial, MooseX::Interface::Internals.
 
     Moose::Role, MooseX::ABCD.
 

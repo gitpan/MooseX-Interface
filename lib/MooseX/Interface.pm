@@ -7,7 +7,6 @@ use Moose::Role 2.00 ();
 use Moose::Util 0 ();
 use Moose::Util::MetaRole 0 ();
 use constant 1.01 ();
-use Hook::AfterRuntime 0 ();
 use Class::Load 0 ();
 
 {
@@ -15,8 +14,8 @@ use Class::Load 0 ();
 	
 	BEGIN {
 		$MooseX::Interface::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::VERSION   = '0.005';
-	
+		$MooseX::Interface::VERSION   = '0.006';
+		
 		*requires = \&Moose::Role::requires;
 		*excludes = \&Moose::Role::excludes;
 	}
@@ -40,9 +39,16 @@ use Class::Load 0 ();
 			unless $other->meta->can('is_interface') && $other->meta->is_interface;
 		Moose::Util::ensure_all_roles($meta->name, $other);
 	}
-
+	
+	sub one ()
+	{
+		my $meta = shift || Class::MOP::class_of( (scalar caller)[0] );
+		$meta->check_interface_integrity;
+		return 1;
+	}
+	
 	my ($import, $unimport) = Moose::Exporter->build_import_methods(
-		with_meta => [qw( extends excludes const requires )],
+		with_meta => [qw( extends excludes const requires one )],
 		as_is     => [qw( test_case )],
 	);
 	
@@ -53,10 +59,10 @@ use Class::Load 0 ();
 	
 	sub import
 	{
-		my $caller = caller;
-		Hook::AfterRuntime::after_runtime {
-			$caller->meta->check_interface_integrity;
-		};
+#		my $caller = caller;
+#		Hook::AfterRuntime::after_runtime {
+#			$caller->meta->check_interface_integrity;
+#		};
 		goto $import;
 	}
 
@@ -80,36 +86,36 @@ use Class::Load 0 ();
 }
 
 {
-	package MooseX::Interface::Trait::Method::Constant;
+	package MooseX::Interface::Meta::Method::Constant;
 	use Moose;
 	extends 'Moose::Meta::Method';
 	
 	BEGIN {
-		$MooseX::Interface::Trait::Method::Constant::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Constant::VERSION   = '0.005';
+		$MooseX::Interface::Meta::Method::Constant::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Meta::Method::Constant::VERSION   = '0.006';
 	}
 }
 
 {
-	package MooseX::Interface::Trait::Method::Required;
+	package MooseX::Interface::Meta::Method::Required;
 	use Moose;
 	extends 'Moose::Meta::Role::Method::Required';
 	
 	BEGIN {
-		$MooseX::Interface::Trait::Method::Required::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Required::VERSION   = '0.005';
+		$MooseX::Interface::Meta::Method::Required::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Meta::Method::Required::VERSION   = '0.006';
 	}
 }
 
 {
-	package MooseX::Interface::Trait::Method::Required::WithSignature;
+	package MooseX::Interface::Meta::Method::Required::WithSignature;
 	use Moose;
 	use Moose::Util::TypeConstraints ();
-	extends 'MooseX::Interface::Trait::Method::Required';
+	extends 'MooseX::Interface::Meta::Method::Required';
 	
 	BEGIN {
-		$MooseX::Interface::Trait::Method::Required::WithSignature::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Method::Required::WithSignature::VERSION   = '0.005';
+		$MooseX::Interface::Meta::Method::Required::WithSignature::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Meta::Method::Required::WithSignature::VERSION   = '0.006';
 	}
 	
 	has signature => (
@@ -134,13 +140,13 @@ use Class::Load 0 ();
 }
 
 {
-	package MooseX::Interface::ImplementationReport;
+	package MooseX::Interface::Meta::TestReport;
 	use Moose;
 	use namespace::clean;
 	
 	BEGIN {
-		$MooseX::Interface::ImplementationReport::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::ImplementationReport::VERSION   = '0.005';
+		$MooseX::Interface::Meta::TestReport::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Meta::TestReport::VERSION   = '0.006';
 	}
 	
 	use overload
@@ -159,13 +165,13 @@ use Class::Load 0 ();
 }
 
 {
-	package MooseX::Interface::TestCase;
+	package MooseX::Interface::Meta::TestCase;
 	use Moose;
 	use namespace::clean;
 	
 	BEGIN {
-		$MooseX::Interface::TestCase::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::TestCase::VERSION   = '0.005';
+		$MooseX::Interface::Meta::TestCase::AUTHORITY = 'cpan:TOBYINK';
+		$MooseX::Interface::Meta::TestCase::VERSION   = '0.006';
 	}
 	
 	has name => (
@@ -202,9 +208,9 @@ use Class::Load 0 ();
 	
 	BEGIN {
 		$MooseX::Interface::Trait::Role::AUTHORITY = 'cpan:TOBYINK';
-		$MooseX::Interface::Trait::Role::VERSION   = '0.005';
+		$MooseX::Interface::Trait::Role::VERSION   = '0.006';
 	}
-
+	
 	requires qw(
 		name
 		calculate_all_roles
@@ -225,9 +231,28 @@ use Class::Load 0 ();
 	
 	has test_cases => (
 		is      => 'ro',
-		isa     => 'ArrayRef[MooseX::Interface::TestCase]',
+		isa     => 'ArrayRef[MooseX::Interface::Meta::TestCase]',
 		default => sub { [] },
 	);
+	
+	has integrity_checked => (
+		is      => 'rw',
+		isa     => 'Bool',
+		default => 0,
+	);
+	
+	has installed_modifiers => (
+		is      => 'ro',
+		isa     => 'HashRef[Int]',
+		default => sub { +{} },
+	);
+	
+	before apply => sub
+	{
+		my $meta = shift;
+		$meta->check_interface_integrity
+			unless $meta->integrity_checked;
+	};
 	
 	around add_required_methods => sub 
 	{
@@ -240,25 +265,26 @@ use Class::Load 0 ();
 			my $meth = shift;
 			my $sign = ( ref $_[0] or not defined $_[0] ) ? shift : undef;
 			push @required, $sign
-				? 'MooseX::Interface::Trait::Method::Required::WithSignature'->new(name => $meth, signature => $sign)
-				: 'MooseX::Interface::Trait::Method::Required'->new(name => $meth)
+				? 'MooseX::Interface::Meta::Method::Required::WithSignature'->new(name => $meth, signature => $sign)
+				: 'MooseX::Interface::Meta::Method::Required'->new(name => $meth)
 		}
 		
 		foreach my $r (@required)
 		{
 			next unless $r->can('check_signature');
-			$meta->add_before_method_modifier(
-				$r->name,
-				sub {
-					my ($self, @args) = @_;
-					$r->check_signature(\@args) or die sprintf(
-						"method call '%s' on object %s did not conform to signature defined in interface %s",
-						$r->name,
-						overload::StrVal($self),
-						$meta->name,
-					);
-				},
-			);
+			
+			my $modifier = sub {
+				my ($self, @args) = @_;
+				$r->check_signature(\@args) or die sprintf(
+					"method call '%s' on object %s did not conform to signature defined in interface %s",
+					$r->name,
+					overload::StrVal($self),
+					$meta->name,
+				);
+			};
+			
+			$meta->installed_modifiers->{$r->name} = Scalar::Util::refaddr($modifier);
+			$meta->add_before_method_modifier($r->name, $modifier);
 		}
 		
 		return $meta->$orig(@required);
@@ -268,7 +294,7 @@ use Class::Load 0 ();
 	{
 		my ($meta, $name, $value) = @_;
 		$meta->add_method(
-			$name => 'MooseX::Interface::Trait::Method::Constant'->wrap(
+			$name => 'MooseX::Interface::Meta::Method::Constant'->wrap(
 				sub () { $value },
 				name         => $name,
 				package_name => $meta->name,
@@ -286,7 +312,7 @@ use Class::Load 0 ();
 		else
 		{
 			$name //= sprintf("%s test case %d", $meta->name, 1 + @{ $meta->test_cases });
-			push @{ $meta->test_cases }, 'MooseX::Interface::TestCase'->new(
+			push @{ $meta->test_cases }, 'MooseX::Interface::Meta::TestCase'->new(
 				name                 => $name,
 				code                 => $coderef,
 				associated_interface => $meta,
@@ -312,12 +338,12 @@ use Class::Load 0 ();
 				: push(@failed, $case)
 		}
 		
-		return 'MooseX::Interface::ImplementationReport'->new(
+		return 'MooseX::Interface::Meta::TestReport'->new(
 			failed => \@failed,
 			passed => \@passed,
 		);
 	}
-
+	
 	sub find_problematic_methods
 	{
 		my $meta = shift;
@@ -335,11 +361,39 @@ use Class::Load 0 ();
 			
 			# skip constants defined by constant.pm
 			next if $constant::declared{ $M->fully_qualified_name };
-		
+			
 			# skip constants defined by MooseX::Interface
-			next if $M->isa('MooseX::Interface::Trait::Method::Constant');
+			next if $M->isa('MooseX::Interface::Meta::Method::Constant');
 			
 			push @problems, $m;
+		}
+		
+		return @problems;
+	}
+
+	sub find_problematic_method_modifiers
+	{
+		my $meta = shift;
+		my @problems;
+		
+		foreach my $type (qw( after around before override ))
+		{
+			my $has = "get_${type}_method_modifiers_map";
+			my $map = $meta->$has;
+			foreach my $subname (sort keys %$map)
+			{
+				if (
+					$type eq 'before' &&
+					defined $meta->installed_modifiers->{$subname}
+				) {
+					# It would be nice to check the refaddr of the
+					# modifier was the one we created, but Moose
+					# seems to wrap it or something.
+					#
+					next;
+				}
+				push @problems, "$type($subname)";
+			}
 		}
 		
 		return @problems;
@@ -349,31 +403,27 @@ use Class::Load 0 ();
 	{
 		my $meta = shift;
 		
-		if (my @problems = $meta->find_problematic_methods)
-		{
-			my $iface    = $meta->name;
-			my $s        = (@problems==1 ? '' : 's');
-			my $problems = join q[, ], sort @problems;
-			$problems =~ s/, ([^,]+)$/, and $1/;
-			
-			confess(
-				"Method$s defined within interface $iface ".
-				"(try Moose::Role instead): $problems; died"
-			);
-		}
+		my @checks = (
+			[ find_problematic_methods           => 'Method' ],
+			[ find_problematic_method_modifiers  => 'Method modifier' ],
+		);
 		
-		foreach (qw( after around before override ))
+		while (my ($check_method, $check_text) = @{ +shift(@checks) || [] })
 		{
-			my $has = "get_${_}_method_modifiers_map";
-			if (keys %{ $meta->$has })
+			if (my @problems = $meta->$check_method)
 			{
 				my $iface    = $meta->name;
+				my $problems = Moose::Util::english_list(@problems);
+				my $s        = (@problems==1 ? '' : 's');
+				
 				confess(
-					"Method modifier defined within interface $iface ".
-					"(try Moose::Role instead); died"
+					"${check_text}${s} defined within interface ${iface} ".
+					"(try Moose::Role instead): ${problems}; died"
 				);
 			}
 		}
+		
+		$meta->integrity_checked(1);
 	}
 }
 
@@ -391,6 +441,7 @@ MooseX::Interface - Java-style interfaces for Moose
   {
     use MooseX::Interface;
     requires 'select';
+    one;
   }
   
   package DatabaseAPI::ReadWrite
@@ -400,6 +451,7 @@ MooseX::Interface - Java-style interfaces for Moose
     requires 'insert';
     requires 'update';
     requires 'delete';
+    one;
   }
   
   package Database::MySQL
@@ -536,6 +588,21 @@ Do not rely on test cases being run in any particular order, or maintaining
 any state between test cases. (Theoretically each test case could be run with
 a separate instance of the implementing class.)
 
+=item C<< one >>
+
+This function checks the integrity of your role, making sure it doesn't do
+anything that interfaces are not supposed to do, like defining methods.
+
+While you don't need to call this function at all, your interface's integrity
+will get checked anyway when classes implement the interface, so calling
+C<one> will help you catch potential problems sooner. C<one> helpfully returns
+'1', so it can be used as the magical return value at the end of a Perl
+module.
+
+(Backwards compatibility note: in MooseX::Interface versions 0.005 and below,
+this was performed automatically using L<Hook::AfterRuntime>. From 0.006, the
+C<one> function was introduced instead.)
+
 =back
 
 =begin private
@@ -551,7 +618,8 @@ L<http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>.
 
 =head1 SEE ALSO
 
-L<MooseX::Interface::Tutorial>.
+L<MooseX::Interface::Tutorial>,
+L<MooseX::Interface::Internals>.
 
 L<Moose::Role>, L<MooseX::ABCD>.
 

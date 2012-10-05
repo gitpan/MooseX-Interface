@@ -21,6 +21,7 @@ inc/unicore/Name.pm
 inc/utf8.pm
 inc/YAML/Tiny.pm
 lib/MooseX/Interface.pm
+lib/MooseX/Interface/Internals.pod
 lib/MooseX/Interface/Tutorial.pod
 LICENSE
 Makefile.PL
@@ -30,6 +31,7 @@ meta/changes.pret
 meta/doap.pret
 meta/makefile.pret
 README
+t/01integrity.t
 t/02interfaces.t
 t/03embeddedtc.t
 t/04meta.t
