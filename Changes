@@ -6,6 +6,10 @@ Home page:    <https://metacpan.org/release/MooseX-Interface>
 Bug tracker:  <http://rt.cpan.org/Dist/Display.html?Queue=MooseX-Interface>
 Maintainer:   Toby Inkster <mailto:tobyink@cpan.org>
 
+0.007  2013-06-28
+
+ - (Update) Drop usage of smartmatch.
+
 0.006  2012-10-05
 
  - (Documentation) Document internals.
